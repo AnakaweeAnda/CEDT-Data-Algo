@@ -30,7 +30,7 @@ int main()
 	for(int i=2;i<=n;i++)
 	{
 		dp[i] = (2*dp[i-1])%M+dp[i-2]%M;
-		dp[i] %= M;
+		dp[i] %= M;	
 	}
 	cout << dp[n];
 	
