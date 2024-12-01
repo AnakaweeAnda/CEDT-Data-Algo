@@ -12,44 +12,43 @@ typedef pair<int, int> pii;
 typedef vector<int> vi;
 typedef pair<ll,ll> pll;
 
-int n;
-ll val[2005];
-vector<pii> adj[2005];
-bool visited[2005];
-int dist[2005];
+
 int main() {
 	ios_base::sync_with_stdio(0);
     cin.tie(0);
+    int n;
     cin >> n;
+    int a[n];
     for(int i=0;i<n;i++) {
-        cin >> val[i];
-        dist[i]=-1;
+        cin >> a[i];
     }
+    int dist[n];
+    vector<pll> adj[n];
     for(int i=0;i<n;i++) {
         for(int j=0;j<n;j++) {
-            if(i==j) continue;
-            adj[i].push_back({j,val[i]^val[j]});
-            adj[j].push_back({i,val[i]^val[j]});
+            if(i!=j) adj[i].push_back({j,a[i]^a[j]});
+
         }
     }
-    dist[0]=0;
-    priority_queue<pii,vector<pii>> pq;
+    fill(dist,dist+n,-1);
+    bool visited[n];
+    memset(visited,false,sizeof(visited));
+    priority_queue<pll,vector<pll>> pq;
+    dist[0] = 0;
     pq.push({dist[0],0});
     while(!pq.empty()) {
         auto [d,u] = pq.top();
         pq.pop();
         if(visited[u]) continue;
         visited[u]=true;
-        for(auto [v,w]:adj[u]) {
-            if(!visited[v] && w > dist[v]) {
+        for(auto [v,w] : adj[u]) {
+            if(w > dist[v] && !visited[v]) {
                 dist[v] = w;
                 pq.push({dist[v],v});
             }
-        }
+        } 
     }
-    ll sum = 0;
-    for(int i=0;i<n;i++) {
-        sum += dist[i];
-    }
-    cout << sum;
+    size_t ans = 0;
+    for(int i=0;i<n;i++) ans += dist[i];
+    cout << ans;
 }
