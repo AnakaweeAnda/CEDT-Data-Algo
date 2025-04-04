@@ -1,47 +1,68 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+
 using namespace std;
-typedef long long ll;
 
+// Directions for 4-directional movement
+const int directions[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
-int board[5005][5005];
-int R,C;
-int dist[5005][5005];
-int dir[4] = {0,0,-1,1};
-int dic[4] = {-1,1,0,0};
-vector<pair<int,int>> second_country;
+int minBridgeLength(vector<vector<int>> &grid, int R, int C) {
+    vector<vector<int>> dist(R, vector<int>(C, -1)); // Distance from A
+    queue<pair<int, int>> q;
+
+    // Step 1: Add all cells of country A (1) to the queue
+    for (int i = 0; i < R; ++i) {
+        for (int j = 0; j < C; ++j) {
+            if (grid[i][j] == 1) {
+                q.push({i, j});
+                dist[i][j] = 1; // Start counting the bridge length from A
+            }
+        }
+    }
+
+    // Step 2: BFS to find the shortest bridge
+    while (!q.empty()) {
+        auto [x, y] = q.front();
+        q.pop();
+
+        for (const auto &dir : directions) {
+            int nx = x + dir[0], ny = y + dir[1];
+
+            // Skip out-of-bound cells or volcanoes
+            if (nx < 0 || nx >= R || ny < 0 || ny >= C || grid[nx][ny] == 3 || dist[nx][ny] != -1)
+                continue;
+
+            // If we reach a territory of B (2), return the total bridge length
+            if (grid[nx][ny] == 2)
+                return dist[x][y] + 1;
+
+            // Expand into sea (0)
+            if (grid[nx][ny] == 0) {
+                q.push({nx, ny});
+                dist[nx][ny] = dist[x][y] + 1; // Update distance
+            }
+        }
+    }
+
+    return -1; // Should not happen as a solution is guaranteed
+}
+
 int main() {
-	ios_base::sync_with_stdio(0);
-    cin.tie(0);
+    // Input reading
+    int R, C;
     cin >> R >> C;
-    priority_queue<tuple<int,int,int>,vector<tuple<int,int,int>>,greater<tuple<int,int,int>>> pq;
-    for(int i=1;i<=R;i++) {
-        for(int j=1;j<=C;j++) {
-            cin >> board[i][j];
-            dist[i][j] = 1000000000;
-            if(board[i][j] == 1) {
-                dist[i][j]=1;
-                pq.push({dist[i][j],i,j});
-            }
-            if(board[i][j] == 2) second_country.push_back({i,j});
+    vector<vector<int>> grid(R, vector<int>(C));
+
+    for (int i = 0; i < R; ++i) {
+        for (int j = 0; j < C; ++j) {
+            cin >> grid[i][j];
         }
     }
-    while(!pq.empty()) {
-        auto [d,r,c] = pq.top();
-        pq.pop();
-        for(int i=0;i<4;i++) {
-            int nr = r + dir[i];
-            int nc = c + dic[i];
-            if(nr < 1 || nr > R || nc<1 || nc > C) continue;
-            if(board[nr][nc] == 3) continue;
-            if(dist[nr][nc] > dist[r][c] + 1) {
-                dist[nr][nc] = dist[r][c] + 1;
-                pq.push({dist[nr][nc],nr,nc});
-            }
-        }
-    }
-    int ans = INT_MAX;
-    for(auto [a,b] : second_country) {
-        ans = min(dist[a][b],ans);
-    }
-    cout << ans;
+
+    // Solve and output the result
+    cout << minBridgeLength(grid, R, C) << endl;
+
+    return 0;
 }
